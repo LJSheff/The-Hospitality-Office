@@ -1,6 +1,0 @@
-import { NextResponse } from "next/server";
-import { getDb } from "@/db";
-import { bookings } from "@/db/schema";
-import { z } from "zod";
-const schema = z.object({ name:z.string().trim().min(2).max(80), email:z.string().trim().email().max(120), phone:z.string().trim().min(7).max(30), eventType:z.string().trim().min(2).max(80), eventDate:z.string().max(20).optional().or(z.literal("")), guests:z.coerce.number().int().min(1).max(5000), location:z.string().trim().min(2).max(160), notes:z.string().trim().max(1500).optional(), website:z.string().max(0).optional() });
-export async function POST(request: Request) { try { const body = schema.parse(await request.json()); if (body.website) return NextResponse.json({ error:"Unable to send enquiry." },{status:400}); await getDb().insert(bookings).values({ id:crypto.randomUUID(), name:body.name, email:body.email.toLowerCase(), phone:body.phone, eventType:body.eventType, eventDate:body.eventDate || null, guests:body.guests, location:body.location, notes:body.notes || "", status:"pending" }); return NextResponse.json({ ok:true },{status:201}); } catch { return NextResponse.json({ error:"Please check the details and try again." },{status:400}); } }
